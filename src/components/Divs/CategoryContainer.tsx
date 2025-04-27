@@ -2,6 +2,7 @@ import {
   createCard,
   deleteCardByCategoryAndCardId,
   getCardsDetailsByCategoryId,
+  likeCard,
   updateCard,
 } from "@/utils/api/card";
 import {
@@ -12,7 +13,7 @@ import {
 } from "@/utils/api/comment";
 import { PCreateCard, PUpdateCard } from "@/utils/api/payloads";
 import { DarkerColor } from "@/utils/color";
-import { TCard, TComment } from "@/utils/type";
+import { TBoard, TCard, TComment } from "@/utils/type";
 import { useEffect, useState } from "react";
 import CardInput from "../fields/CardInput";
 import { CloseIcon, CommentIcon, PlusIcon, RemoveIcon } from "../icons/icons";
@@ -25,6 +26,7 @@ interface Props {
   setCurrentlyEditingCardId: (id: number | undefined) => void;
   currentlyEditingCommentId: number | undefined;
   setCurrentlyEditingCommentId: (id: number | undefined) => void;
+  boardData?: TBoard;
 }
 
 const CategoryContainer = ({
@@ -35,6 +37,7 @@ const CategoryContainer = ({
   setCurrentlyEditingCardId,
   currentlyEditingCommentId,
   setCurrentlyEditingCommentId,
+  boardData,
 }: Props) => {
   const [cardData, setCardData] = useState<TCard>();
   const [showNewCardForm, setShowNewCardForm] = useState(false);
@@ -123,6 +126,11 @@ const CategoryContainer = ({
     fetchCommentsByCardId(cardId);
   };
 
+  const handleLike = async (categoryId: number, cardId: number) => {
+    await likeCard(categoryId, cardId);
+    fetchCardsData();
+  };
+
   useEffect(() => {
     fetchCardsData();
   }, []);
@@ -163,16 +171,18 @@ const CategoryContainer = ({
                 }
               }}
             >
-              <div>
-                <p
-                  className="text-md leading-normal border border-white/10 px-2 rounded w-fit mb-3"
-                  style={{
-                    background: DarkerColor(color, -20),
-                  }}
-                >
-                  {card.username}
-                </p>
-              </div>
+              {boardData?.show_names && (
+                <div>
+                  <p
+                    className="text-md leading-normal border border-white/10 px-2 rounded w-fit mb-3"
+                    style={{
+                      background: DarkerColor(color, -20),
+                    }}
+                  >
+                    {card.username}
+                  </p>
+                </div>
+              )}
               <h3
                 id="card-content"
                 className="text-2xl leading-normal cursor-pointer"
@@ -187,156 +197,171 @@ const CategoryContainer = ({
                   >
                     <RemoveIcon className="text-white w-4 h-4" />
                   </button>
-                  <button
-                    className="flex flex-row gap-2 text-white rounded-sm py-1 px-1 mt-4 hover:bg-white/20 transition-all duration-100 text-sm cursor-pointer group-hover:opacity-100 opacity-0 transition-all duration-500"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (openComments[card.id]) {
-                        setOpenComments((prev) => ({
-                          ...prev,
-                          [card.id]: false,
-                        }));
-                      } else {
-                        setOpenComments((prev) => ({
-                          ...prev,
-                          [card.id]: true,
-                        }));
-                        fetchCommentsByCardId(card.id);
-                      }
-                    }}
-                  >
-                    <CommentIcon className="text-white w-4 h-4" />
-                  </button>
-                </div>
-                <button className="flex flex-row gap-2 text-white rounded-sm py-1/2 px-1 mt-4 hover:bg-white/20 transition-all duration-100 text-sm cursor-pointer border border-white/30">
-                  {card.like_count > 0 ? card.like_count + " Liked" : "Like"}
-                </button>
-              </div>
-              {openComments[card.id] && (
-                <>
-                  <hr className="w-full border-t-1 border-white/20 my-2" />
-                  {showNewCommentForm && (
-                    <div className="flex flex-row items-center justify-between gap-2 mt-4">
-                      <CardInput
-                        id="comment-input"
-                        placeholder="Write a comment.."
-                        onChange={(e) => setNewCommentContent(e.target.value)}
-                        onBlur={() => {
-                          if (newCommentContent !== "") {
-                            handleCreateComment(card.id);
-                          } else {
-                            setShowNewCommentForm(false);
-                          }
-                        }}
-                        onKeyUp={(e) => {
-                          if (e.key === "Enter") {
-                            if (newCommentContent !== "") {
-                              handleCreateComment(card.id);
-                            } else {
-                              setShowNewCommentForm(false);
-                            }
-                          }
-                        }}
-                      />
-                    </div>
+                  {boardData?.show_comments && (
+                    <button
+                      className="flex flex-row gap-2 text-white rounded-sm py-1 px-1 mt-4 hover:bg-white/20 transition-all duration-100 text-sm cursor-pointer group-hover:opacity-100 opacity-0 transition-all duration-500"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (openComments[card.id]) {
+                          setOpenComments((prev) => ({
+                            ...prev,
+                            [card.id]: false,
+                          }));
+                        } else {
+                          setOpenComments((prev) => ({
+                            ...prev,
+                            [card.id]: true,
+                          }));
+                          fetchCommentsByCardId(card.id);
+                        }
+                      }}
+                    >
+                      <CommentIcon className="text-white w-4 h-4" />
+                    </button>
                   )}
-                  <div className="flex flex-col gap-2 mt-2">
-                    {!showNewCommentForm && (
-                      <button
-                        className="flex flex-row gap-2 text-white rounded-sm py-1 px-1 hover:bg-white/20 transition-all duration-100 text-sm cursor-pointer group-hover:opacity-100 opacity-0 transition-all duration-500 justify-center"
-                        onClick={() => setShowNewCommentForm(true)}
-                      >
-                        <PlusIcon className="text-white w-4 h-4" />
-                      </button>
-                    )}
-                    {comments[card.id]?.length > 0 ? (
-                      comments[card.id]?.map((comment, index) => {
-                        if (comment.id !== currentlyEditingCommentId) {
-                          return (
-                            <div
-                              key={`comment-${index}`}
-                              className="group rounded flex flex-row py-2 px-3 text-white border-1 border-white/30 w-full"
-                              style={{
-                                background: DarkerColor(color, -20),
-                              }}
-                              onClick={(e) => {
-                                const target = e.target as HTMLElement;
-                                if (target.id === "comment-content") {
-                                  setCurrentlyEditingCommentId(comment.id);
-                                  setEditCommentContent(comment.content);
-                                  setShowEditCommentForm(true);
+                </div>
+                {boardData?.show_likes && (
+                  <button
+                    className="flex flex-row gap-2 text-white rounded-sm py-1/2 px-1 mt-4 hover:bg-white/20 transition-all duration-100 text-sm cursor-pointer border border-white/30"
+                    onClick={() => handleLike(id, card.id)}
+                  >
+                    {card.like_count > 0 ? card.like_count + " Liked" : "Like"}
+                  </button>
+                )}
+              </div>
+              {boardData?.show_comments && (
+                <>
+                  {openComments[card.id] && (
+                    <>
+                      <hr className="w-full border-t-1 border-white/20 my-2" />
+                      {showNewCommentForm && (
+                        <div className="flex flex-row items-center justify-between gap-2 mt-4">
+                          <CardInput
+                            id="comment-input"
+                            placeholder="Write a comment.."
+                            onChange={(e) =>
+                              setNewCommentContent(e.target.value)
+                            }
+                            onBlur={() => {
+                              if (newCommentContent !== "") {
+                                handleCreateComment(card.id);
+                              } else {
+                                setShowNewCommentForm(false);
+                              }
+                            }}
+                            onKeyUp={(e) => {
+                              if (e.key === "Enter") {
+                                if (newCommentContent !== "") {
+                                  handleCreateComment(card.id);
+                                } else {
+                                  setShowNewCommentForm(false);
+                                }
+                              }
+                            }}
+                          />
+                        </div>
+                      )}
+                      <div className="flex flex-col gap-2 mt-2">
+                        {!showNewCommentForm && (
+                          <button
+                            className="flex flex-row gap-2 text-white rounded-sm py-1 px-1 hover:bg-white/20 transition-all duration-100 text-sm cursor-pointer group-hover:opacity-100 opacity-0 transition-all duration-500 justify-center"
+                            onClick={() => setShowNewCommentForm(true)}
+                          >
+                            <PlusIcon className="text-white w-4 h-4" />
+                          </button>
+                        )}
+                        {comments[card.id]?.length > 0 ? (
+                          comments[card.id]?.map((comment, index) => {
+                            if (comment.id !== currentlyEditingCommentId) {
+                              return (
+                                <div
+                                  key={`comment-${index}`}
+                                  className="group rounded flex flex-row py-2 px-3 text-white border-1 border-white/30 w-full"
+                                  style={{
+                                    background: DarkerColor(color, -20),
+                                  }}
+                                  onClick={(e) => {
+                                    const target = e.target as HTMLElement;
+                                    if (target.id === "comment-content") {
+                                      setCurrentlyEditingCommentId(comment.id);
+                                      setEditCommentContent(comment.content);
+                                      setShowEditCommentForm(true);
+                                    }
+                                  }}
+                                >
+                                  {boardData.show_names && (
+                                    <p
+                                      className="text-sm leading-normal border border-white/10 px-2 rounded w-fit h-fit mr-2"
+                                      style={{
+                                        background: DarkerColor(color, 50),
+                                      }}
+                                    >
+                                      {comment.username}
+                                    </p>
+                                  )}
+                                  <h3
+                                    className="text-md leading-normal w-full"
+                                    id="comment-content"
+                                  >
+                                    {comment.content}
+                                  </h3>
+                                  <button
+                                    className="flex flex-row gap-2 text-white rounded-sm py-1 px-1 hover:bg-white/20 transition-all duration-100 text-sm cursor-pointer group-hover:opacity-100 opacity-0 transition-all duration-500 h-fit w-fit"
+                                    onClick={() => {
+                                      handleDeleteComment(card.id, comment.id);
+                                    }}
+                                  >
+                                    <CloseIcon className="text-white w-4 h-4" />
+                                  </button>
+                                </div>
+                              );
+                            }
+                          })
+                        ) : (
+                          <div className="text-white/50 text-sm text-center mb-2">
+                            No comments yet.
+                          </div>
+                        )}
+
+                        {showEditCommentForm && (
+                          <div className="flex flex-row items-center justify-between gap-2 mt-4">
+                            <CardInput
+                              id="edit-comment-input"
+                              placeholder="Edit comment.."
+                              value={editCommentContent}
+                              onChange={(e) =>
+                                setEditCommentContent(e.target.value)
+                              }
+                              onBlur={() => {
+                                if (editCommentContent !== "") {
+                                  handleEditComment(
+                                    card.id,
+                                    currentlyEditingCommentId as number
+                                  );
+                                } else {
+                                  setCurrentlyEditingCommentId(undefined);
+                                  setShowEditCommentForm(false);
                                 }
                               }}
-                            >
-                              <p
-                                className="text-sm leading-normal border border-white/10 px-2 rounded w-fit h-fit mr-2"
-                                style={{
-                                  background: DarkerColor(color, 50),
-                                }}
-                              >
-                                {comment.username}
-                              </p>
-                              <h3
-                                className="text-md leading-normal w-full"
-                                id="comment-content"
-                              >
-                                {comment.content}
-                              </h3>
-                              <button
-                                className="flex flex-row gap-2 text-white rounded-sm py-1 px-1 hover:bg-white/20 transition-all duration-100 text-sm cursor-pointer group-hover:opacity-100 opacity-0 transition-all duration-500 h-fit w-fit"
-                                onClick={() => {
-                                  handleDeleteComment(card.id, comment.id);
-                                }}
-                              >
-                                <CloseIcon className="text-white w-4 h-4" />
-                              </button>
-                            </div>
-                          );
-                        }
-                      })
-                    ) : (
-                      <div className="text-white/50 text-sm text-center mb-2">
-                        No comments yet.
+                              onKeyUp={(e) => {
+                                if (e.key === "Enter") {
+                                  if (editCommentContent !== "") {
+                                    handleEditComment(
+                                      card.id,
+                                      currentlyEditingCommentId as number
+                                    );
+                                  } else {
+                                    setCurrentlyEditingCommentId(undefined);
+                                    setShowEditCommentForm(false);
+                                  }
+                                }
+                              }}
+                            />
+                          </div>
+                        )}
                       </div>
-                    )}
-
-                    {showEditCommentForm && (
-                      <div className="flex flex-row items-center justify-between gap-2 mt-4">
-                        <CardInput
-                          id="edit-comment-input"
-                          placeholder="Edit comment.."
-                          value={editCommentContent}
-                          onChange={(e) =>
-                            setEditCommentContent(e.target.value)
-                          }
-                          onBlur={() => {
-                            if (editCommentContent !== "") {
-                              handleEditComment(
-                                card.id,
-                                currentlyEditingCommentId as number
-                              );
-                            } else {
-                              setCurrentlyEditingCommentId(undefined);
-                              setShowEditCommentForm(false);
-                            }
-                          }}
-                          onKeyUp={(e) => {
-                            if (e.key === "Enter") {
-                              if (editCommentContent !== "") {
-                                handleEditComment(
-                                  card.id,
-                                  currentlyEditingCommentId as number
-                                );
-                              } else {
-                                setCurrentlyEditingCommentId(undefined);
-                                setShowEditCommentForm(false);
-                              }
-                            }
-                          }}
-                        />
-                      </div>
-                    )}
-                  </div>
+                    </>
+                  )}
                 </>
               )}
             </div>

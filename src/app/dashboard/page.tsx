@@ -53,6 +53,7 @@ const Dashboard = () => {
                   date={getDateFromTimestamp(item.created_date)}
                   likes={10}
                   categoriesLength={item.cardCountPerCategory}
+                  fetchAllBoards={fetchAllBoards}
                 />
               ))}
             </div>
