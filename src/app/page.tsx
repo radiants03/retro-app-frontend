@@ -1,9 +1,13 @@
-const Home = () => {
-    return (
-        <main>
-            <h1>Welcome to retro-app-frontend</h1>
-        </main>
-    );
-}
+"use client";
 
-export default Home
+import LandingPage from "@/components/landing/LandingPage";
+
+const Home = () => {
+  return (
+    <>
+      <LandingPage />
+    </>
+  );
+};
+
+export default Home;
