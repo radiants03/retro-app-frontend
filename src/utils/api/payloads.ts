@@ -48,3 +48,15 @@ export type PUpdateBoard = {
   show_comments: boolean;
   is_public: boolean;
 };
+
+export type PPasswordReset = {
+  email: string;
+  first_name: string;
+  new_password: string;
+  confirm_password: string;
+};
+
+export type PCreateCategory = {
+  category_name: string;
+  board_id: number;
+};

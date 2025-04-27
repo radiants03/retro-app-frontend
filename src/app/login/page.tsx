@@ -6,7 +6,7 @@ import InputField from "@/components/fields/InputField";
 import { login } from "@/utils/api/user";
 import { saveToLocalStorage } from "@/utils/handles";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const Login = () => {
   const { push } = useRouter();
@@ -18,6 +18,13 @@ const Login = () => {
     text: string;
     type: "error" | "info" | "default" | "success" | "warning";
   }>({ text: "", type: "default" });
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem("accessToken");
+    if (accessToken) {
+      push("/dashboard");
+    }
+  }, []);
 
   const handleLogin = async () => {
     setButtonDisabled(true);

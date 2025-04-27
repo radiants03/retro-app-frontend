@@ -33,7 +33,7 @@ const BoardContainer = ({
 
   return (
     <div
-      className="group flex flex-row items-center rounded-xl py-13 px-15 bg-gray-50 hover:bg-yellow-50 border-1 border-gray-200 hover:shadow-md transition-all duration-100 cursor-pointer hover:border-yellow-500 w-full lg:w-auto max-w-full gap-30"
+      className="group flex flex-row items-center rounded-xl py-13 px-15 bg-gray-50 hover:bg-yellow-50 border border-gray-200 hover:shadow-md transition-all duration-100 cursor-pointer hover:border-yellow-500 w-full lg:w-auto lg:min-w-[300px] max-w-full gap-30"
       onClick={() => push(`/dashboard/board/${id}`)}
     >
       <div className="flex flex-col space-y-3 truncate w-full">
