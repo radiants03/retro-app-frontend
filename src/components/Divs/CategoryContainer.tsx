@@ -5,6 +5,7 @@ import {
   likeCard,
   updateCard,
 } from "@/utils/api/card";
+import { deleteCategory } from "@/utils/api/category";
 import {
   createComment,
   deleteCommentByCardIdAndCommentId,
@@ -26,7 +27,9 @@ interface Props {
   setCurrentlyEditingCardId: (id: number | undefined) => void;
   currentlyEditingCommentId: number | undefined;
   setCurrentlyEditingCommentId: (id: number | undefined) => void;
+  fetchAllCategories: () => void,
   boardData?: TBoard;
+  boardId: number;
 }
 
 const CategoryContainer = ({
@@ -37,7 +40,9 @@ const CategoryContainer = ({
   setCurrentlyEditingCardId,
   currentlyEditingCommentId,
   setCurrentlyEditingCommentId,
+  fetchAllCategories,
   boardData,
+  boardId,
 }: Props) => {
   const [cardData, setCardData] = useState<TCard>();
   const [showNewCardForm, setShowNewCardForm] = useState(false);
@@ -126,13 +131,24 @@ const CategoryContainer = ({
     fetchCommentsByCardId(cardId);
   };
 
+  const handleDeleteCategory = async () => {
+    await deleteCategory(boardId, id);
+    fetchAllCategories()
+  };
+
   const handleLike = async (categoryId: number, cardId: number) => {
     await likeCard(categoryId, cardId);
     fetchCardsData();
   };
-
   useEffect(() => {
-    fetchCardsData();
+    const fetchData = async () => {
+      fetchCardsData();
+    };
+    fetchData();
+    const intervalId = setInterval(fetchData, 3000);
+    return () => {
+      clearInterval(intervalId);
+    };
   }, []);
 
   useEffect(() => {
@@ -145,13 +161,20 @@ const CategoryContainer = ({
       style={{ minWidth: "300px" }}
     >
       <div
-        className="rounded py-2 px-15 text-white border-1 border-gray-200 cursor-pointer w-full mb-2 text-center"
+        className="group flex flex-row rounded py-2 px-15 text-white border-1 border-gray-200 cursor-pointer w-full mb-2 text-center relative"
         style={{
           background: color,
         }}
       >
         <h1 className="text-md font-bold">{title || "Untitled"}</h1>
+        <button
+          className="flex flex-row gap-2 text-white rounded-sm py-1 px-1 hover:bg-white/20 transition-all duration-100 text-sm cursor-pointer group-hover:opacity-100 opacity-0 transition-all duration-500 absolute right-2 top-1/2 transform -translate-y-1/2"
+          onClick={() => handleDeleteCategory()}
+        >
+          <RemoveIcon className="text-white w-4 h-4" />
+        </button>
       </div>
+
       <hr className="w-90/100 border-t-1 border-gray-300 mb-4" />
       {cardData?.map((card, index) => {
         if (card.id !== currentlyEditingCardId) {

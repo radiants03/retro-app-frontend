@@ -41,3 +41,11 @@ export type TCategory = {
   id: number;
   category_name: string;
 };
+
+export type TUser = {
+  first_name: string;
+  last_name: string;
+  email: string;
+  last_login: string;
+};
+

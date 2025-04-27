@@ -12,7 +12,7 @@ export const getCommentsByCardId = async (
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
+        "Authorization": "Bearer " + token,
       },
       credentials: "include",
     });
@@ -43,7 +43,7 @@ export const createComment = async (
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
+        "Authorization": "Bearer " + token,
       },
       credentials: "include",
       body: JSON.stringify(payload),
@@ -77,7 +77,7 @@ export const updateComment = async (
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
+        "Authorization": "Bearer " + token,
       },
       credentials: "include",
       body: JSON.stringify(payload),
@@ -110,7 +110,7 @@ export const deleteCommentByCardIdAndCommentId = async (
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
+        "Authorization": "Bearer " + token,
       },
       credentials: "include",
     });

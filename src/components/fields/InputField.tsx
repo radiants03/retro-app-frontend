@@ -7,6 +7,7 @@ interface Props {
   required?: boolean;
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
 }
 
 const InputField = ({
@@ -17,7 +18,8 @@ const InputField = ({
   placeholder,
   required,
   onBlur,
-  onChange
+  onChange,
+  disabled,
 }: Props) => {
   return (
     <input
@@ -29,6 +31,7 @@ const InputField = ({
       onChange={onChange}
       className={`border-1 border-black/15 rounded px-5 py-2 outline-yellow-400 ${className}`}
       required={required}
+      disabled={disabled}
     />
   );
 };

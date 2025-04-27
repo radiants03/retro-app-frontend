@@ -1,11 +1,17 @@
 "use client";
 
 import Alert from "@/components/alerts/Alert";
+import CategoryDialog from "@/components/alerts/CategoryDialog";
 import SettingsDialog from "@/components/alerts/SettingsDialog";
 import CategoryContainer from "@/components/Divs/CategoryContainer";
 import CardInput from "@/components/fields/CardInput";
 import Header from "@/components/header/Header";
-import { PencilIcon, ReturnIcon, SettingsIcon } from "@/components/icons/icons";
+import {
+  PencilIcon,
+  PlusInCircleIcon,
+  ReturnIcon,
+  SettingsIcon,
+} from "@/components/icons/icons";
 import { getBoardDetailsById, updateBoard } from "@/utils/api/board";
 import { getCategoriesByBoardId } from "@/utils/api/category";
 import { PUpdateBoard } from "@/utils/api/payloads";
@@ -27,6 +33,7 @@ const Board = ({ boardId }: Props) => {
   const [editTitleContent, setEditTitleContent] = useState("");
   const [previousTitle, setPreviousTitle] = useState("");
   const [showSettings, setShowSettings] = useState(false);
+  const [showCategoryDialog, setShowCategoryDialog] = useState(false);
   const [currentlyEditingCardId, setCurrentlyEditingCardId] = useState<
     number | undefined
   >(undefined);
@@ -84,8 +91,15 @@ const Board = ({ boardId }: Props) => {
   };
 
   useEffect(() => {
-    fetchBoardData();
-    fetchAllCategories();
+    const fetchData = async () => {
+      await fetchBoardData();
+      await fetchAllCategories();
+    };
+    fetchData();
+    const intervalId = setInterval(fetchData, 5000);
+    return () => {
+      clearInterval(intervalId);
+    };
   }, []);
 
   useEffect(() => {
@@ -127,7 +141,7 @@ const Board = ({ boardId }: Props) => {
               Dashboard / {boardData?.title}
             </p>
             {!isEditingTitle && (
-              <div className="flex flex-row gap-5 items-center pb-15 justify-between">
+              <div className="flex flex-col sm:flex-row gap-5 items-start sm:items-center pb-15 justify-between">
                 <div className="group flex flex-row gap-5 items-center">
                   <h1
                     className="text-4xl font-bold cursor-pointer"
@@ -149,14 +163,25 @@ const Board = ({ boardId }: Props) => {
                     <PencilIcon className="text-gray-500 w-5 h-5" />
                   </button>
                 </div>
-                <button
-                  className="rounded-sm py-1 px-1 hover:bg-white/20 text-sm cursor-pointer transition-all duration-100 w-fit h-fit"
-                  onClick={(e) => {
-                    setShowSettings(true);
-                  }}
-                >
-                  <SettingsIcon className="text-gray-500 w-5 h-5" />
-                </button>
+                <div className="flex flex-row justify-between items-center gap-5">
+                  <button
+                    className="flex flex-row rounded-sm py-1 px-2 hover:bg-gray-300 text-sm cursor-pointer transition-all duration-100 w-fit h-fit justify-between items-center gap-2"
+                    onClick={(e) => {
+                      setShowCategoryDialog(true);
+                    }}
+                  >
+                    Add column{" "}
+                    <PlusInCircleIcon className="text-gray-500 w-5 h-5" />
+                  </button>
+                  <button
+                    className="rounded-sm py-1 px-1 hover:bg-gray-300 text-sm cursor-pointer transition-all duration-100 w-fit h-fit"
+                    onClick={(e) => {
+                      setShowSettings(true);
+                    }}
+                  >
+                    <SettingsIcon className="text-gray-500 w-5 h-5" />
+                  </button>
+                </div>
               </div>
             )}
 
@@ -205,6 +230,8 @@ const Board = ({ boardId }: Props) => {
                     setCurrentlyEditingCommentId={setCurrentlyEditingCommentId}
                     currentlyEditingCommentId={currentlyEditingCommentId}
                     boardData={boardData}
+                    boardId={boardId}
+                    fetchAllCategories={fetchAllCategories}
                   />
                 ))}
             </div>
@@ -215,6 +242,14 @@ const Board = ({ boardId }: Props) => {
         <SettingsDialog
           boardId={boardId}
           close={() => setShowSettings(false)}
+          fetchBoardDataFromParent={fetchBoardData}
+          fetchAllCategories={fetchAllCategories}
+        />
+      )}
+      {showCategoryDialog && (
+        <CategoryDialog
+          boardId={boardId as number}
+          close={() => setShowCategoryDialog(false)}
           fetchBoardDataFromParent={fetchBoardData}
           fetchAllCategories={fetchAllCategories}
         />

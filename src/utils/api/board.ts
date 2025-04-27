@@ -12,7 +12,7 @@ export const getBoardDetailsById = async (
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
+        "Authorization": "Bearer " + token,
       },
       credentials: "include",
     });
@@ -43,7 +43,7 @@ export const createBoard = async (
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
+        "Authorization": "Bearer " + token,
       },
       credentials: "include",
       body: JSON.stringify(payload),
@@ -76,7 +76,7 @@ export const updateBoard = async (
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
+        "Authorization": "Bearer " + token,
       },
       credentials: "include",
       body: JSON.stringify(payload),
@@ -106,7 +106,7 @@ export const deleteBoard = async (boardId: number): Promise<ApiResponse> => {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
+        "Authorization": "Bearer " + token,
       },
       credentials: "include",
     });
