@@ -7,7 +7,7 @@ interface Props {
   placeholder?: string;
   required?: boolean;
   value?: string;
-  textType?: "card" | "comment";
+  textType?: "board" | "card" | "comment";
   onBlur?: (e: React.FocusEvent<HTMLTextAreaElement>) => void;
   onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onKeyUp?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
@@ -58,7 +58,13 @@ const CardInput = ({
       autoComplete="off"
       value={value}
       className={`border-0 outline-0 resize-none overflow-hidden w-full ${className} ${
-        textType === "card" ? "text-2xl" : "text-base"
+        textType === "board"
+          ? "text-4xl"
+          : textType === "card"
+          ? "text-2xl"
+          : textType === "comment"
+          ? "text-lg"
+          : "text-base"
       }`}
       required={required}
     />

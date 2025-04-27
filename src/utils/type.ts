@@ -11,6 +11,7 @@ export type TDashboardBoard = [
 
 export type TBoard = {
   title: string;
+  show_names: boolean;
   show_likes: boolean;
   show_comments: boolean;
   is_public: boolean;
